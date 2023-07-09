@@ -31,7 +31,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="./javascript/checkToken.js"></script>
-    <script src="./javascript/fetchPlaylists.js"></script>
+    <script src="./javascript/playlistUtils.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         checkToken();
@@ -45,36 +45,7 @@
           .addEventListener("change", async function (event) {
             const playlist = playlistSelect.value;
 
-            try {
-              const response = await axios.get(
-                `/getPlaylist`,
-                { params: { playlist: playlist },
-                
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer " + localStorage.getItem("token"),
-                  },
-                }
-              );
-              
-              if (response.status === 200) {
-                const data = response.data;
-                console.log("Playlist fetched");
-                songList.innerHTML = "";
-
-                data.songs.forEach((song) => {
-                  const listItem = document.createElement("li");
-                  listItem.textContent = `${song.title} - ${song.artist} (${song.duration})`;
-                  songList.appendChild(listItem);
-                });
-
-                songsContainer.style.display = "block";
-              } else {
-                console.error("Failed to fetch playlist:", data.error);
-              }
-            } catch (error) {
-              console.error("Error fetching playlist:", error);
-            }
+            await fetchAndRenderSongsToContainer(playlist);
           });
       });
     </script>

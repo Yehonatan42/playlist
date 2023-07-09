@@ -31,7 +31,7 @@ async function fetchAndRenderPlaylists(UserOrAllPLaylists) {
   function render(playlist) {
     const option = document.createElement("option");
     option.value = playlist.name;
-    const content = document.createTextNode(`${playlist.name}`);
+    const content = document.createTextNode(`${playlist.name} - by ${playlist.owner.username}`);
     option.appendChild(content);
     select.appendChild(option);
   }
@@ -55,7 +55,7 @@ async function fetchAndRenderSongsToBox(playlistName) {
       playlist.songs.forEach((song) => {
         const option = document.createElement("option");
         option.value = song.title;
-        option.text = song.title;
+        option.textContent = `${song.title} - ${song.artist}`;
         songsDropdown.appendChild(option);
       });
     } else {

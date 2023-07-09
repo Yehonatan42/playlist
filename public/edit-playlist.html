@@ -126,7 +126,6 @@
             if (response.status === 200) {
               console.log("Song Added");
               history.replaceState(null, null, window.location.pathname);
-              await fetchAndRenderSongsToContainer(playlist);
             } else {
               console.log("Failed to add song. Please try again.");
             }

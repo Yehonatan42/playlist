@@ -20,6 +20,11 @@ const playlistSchema = new Schema({
     ref: "User",
     required: true,
   },
+  duration: {
+    type: Number,
+    required: true,
+    default: 0
+  }
 });
 
 const Playlist = mongoose.model("Playlist", playlistSchema);

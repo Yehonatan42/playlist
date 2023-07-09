@@ -70,6 +70,7 @@ const addToPlaylist = async (req, res) => {
     }
 
     if (!playlist.songs.includes(newSong._id)) {
+      playlist.duration += newSong.duration;
       playlist.songs.push(newSong._id);
       await playlist.save();
     }
@@ -190,8 +191,9 @@ const getUserPlaylists = async (req, res) => {
 
 const getAllPlaylists = async (req, res) => {
   try {
-    const playlists = await Playlist.find({});
+    const playlists = await Playlist.find({}).populate("owner");
     console.log("Fetched playlists successfully");
+    console.log(playlists);
     res.status(200).json(playlists);
   } catch (error) {
     console.error("Error fetching playlists:", error);
