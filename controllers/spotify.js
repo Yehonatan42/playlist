@@ -1,4 +1,6 @@
 const axios = require("axios");
+require("dotenv").config();
+const spotifyKey = process.env.SPOTIFY_KEY;
 
 const options = {
   method: "GET",
@@ -7,11 +9,11 @@ const options = {
     q: "<REQUIRED>",
     type: "tracks",
     offset: "0",
-    limit: "10",
+    limit: "15",
     numberOfTopResults: "5",
   },
   headers: {
-    "X-RapidAPI-Key": "41dca12252msh500ce4d16710b4fp1bbbd7jsnd719b5b6ba17",
+    "X-RapidAPI-Key": spotifyKey,
     "X-RapidAPI-Host": "spotify23.p.rapidapi.com",
   },
 };
@@ -20,13 +22,14 @@ const searchForSongOptions = async (req, res) => {
   try {
     const request = options;
     request.params.q = req.query.songName;
+    
     const response = await axios.request(request);
     const data = response.data;
 
     if (response.status === 200) {
       const songs = data.tracks.items;
-        
-      return res.status(500).json(songs);
+      
+      return res.status(200).json(songs);
     } else {
       console.error("Failed to fetch songs:", data.error);
     }
@@ -34,5 +37,6 @@ const searchForSongOptions = async (req, res) => {
     console.error("Error fetching songs:", error);
   }
 };
+
 
 module.exports = { searchForSongOptions };

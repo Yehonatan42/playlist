@@ -30,13 +30,20 @@
         <h2>Add Song:</h2>
         <div class="form-group">
           <label for="song-name">Song Name:</label>
-          <input
-            type="text"
-            class="form-control"
-            id="song-name"
-            name="song-name"
-            required
-          />
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              id="song-name"
+              name="song-name"
+              required
+            />
+            <div class="input-group-append">
+              <button type="button" class="btn btn-primary" id="search-button">
+                Search
+              </button>
+            </div>
+          </div>
         </div>
         <div class="form-group">
           <label for="song-options">Song Options:</label>
@@ -92,15 +99,18 @@
 
         addSongButton.addEventListener("click", async function () {
           const playlist = playlistSelect.value;
-          const songName = songNameInput.value;
           const selectedOption =
             songOptionsSelect.options[songOptionsSelect.selectedIndex];
-          const songData = selectedOption.value;
-
+          const songData = JSON.parse(selectedOption.value);
+          if (!playlist) {
+            alert("Please pick playlist");
+            return;
+          }
           try {
             const response = await axios.put(
               `/addToPlaylist`,
               {
+                ApiId: songData.id,
                 playlist: playlist,
                 songName: songData.name,
                 artistName: songData.artists.items[0].profile.name,
@@ -115,22 +125,23 @@
 
             if (response.status === 200) {
               console.log("Song Added");
-              addSongForm.reset();
+              history.replaceState(null, null, window.location.pathname);
+              await fetchAndRenderSongsToContainer(playlist);
             } else {
               console.log("Failed to add song. Please try again.");
             }
           } catch (error) {
-            console.log(
-              "An error occurred while adding the song. Please try again."
-            );
+            console.log("An error occurred while adding the song:", error);
           }
         });
 
-        songNameInput.addEventListener("input", async function () {
+        const searchButton = document.getElementById("search-button");
+
+        searchButton.addEventListener("click", async function () {
           const songName = songNameInput.value;
 
           try {
-            const response = await axios.get(`/searchForSong`, {
+            const response = await axios.get(`/searchForSongOptions`, {
               params: { songName: songName },
               headers: {
                 Authorization: "Bearer " + localStorage.getItem("token"),
@@ -139,13 +150,15 @@
 
             if (response.status === 200) {
               const songOptions = response.data;
+
               populateSongOptions(songOptions);
             } else {
               console.log("Failed to retrieve song options. Please try again.");
             }
           } catch (error) {
             console.log(
-              "An error occurred while retrieving song options. Please try again."
+              "An error occurred while retrieving song options:",
+              error
             );
           }
         });
@@ -154,8 +167,8 @@
           songOptionsSelect.innerHTML = "";
           songOptions.forEach((song) => {
             const option = document.createElement("option");
-            option.value = song.data;
-            option.text = `${song.data.name} - ${song.data.artists.items.profile.name}`;
+            option.value = JSON.stringify(song.data);
+            option.text = `${song.data.name} - ${song.data.artists.items[0].profile.name}`;
             songOptionsSelect.appendChild(option);
           });
         }

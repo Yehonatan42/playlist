@@ -62,9 +62,11 @@ async function fetchAndRenderSongsToBox(playlistName) {
       console.log("Failed to fetch playlist. Please try again.");
     }
   } catch (error) {
-    console.log("An error occurred while fetching the playlist. Please try again.");
+    console.log(
+      "An error occurred while fetching the playlist. Please try again."
+    );
   }
-};
+}
 
 async function fetchAndRenderSongsToContainer(playlistName) {
   try {
@@ -83,7 +85,7 @@ async function fetchAndRenderSongsToContainer(playlistName) {
 
       data.songs.forEach((song) => {
         const listItem = document.createElement("li");
-        listItem.textContent = `${song.title} - ${song.artist} (${song.duration})`;
+        listItem.textContent = `${song.title} - ${song.artist} (${formatTime(song.duration)})`;
         songList.appendChild(listItem);
       });
       songsContainer.style.display = "block";
@@ -94,4 +96,26 @@ async function fetchAndRenderSongsToContainer(playlistName) {
     console.log("Error fetching playlist:", error);
   }
 }
-module.exports = { fetchAndRenderPlaylists, fetchAndRenderSongsToBox, fetchAndRenderSongsToContainer };
+
+const formatTime = (milliseconds) => {
+  const seconds = Math.floor((milliseconds / 1000) % 60);
+  const minutes = Math.floor((milliseconds / 1000 / 60) % 60);
+  const hours = Math.floor((milliseconds / 1000 / 60 / 60) % 24);
+
+  let timeString = "";
+
+  if (hours !== 0) {
+    timeString += hours.toString().padStart(2, "0") + ":";
+  }
+
+  timeString += minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
+
+  return timeString;
+};
+
+
+module.exports = {
+  fetchAndRenderPlaylists,
+  fetchAndRenderSongsToBox,
+  fetchAndRenderSongsToContainer,
+};
