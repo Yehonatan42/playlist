@@ -66,8 +66,8 @@
       <form id="delete-song-form" class="mt-5">
         <h2>Delete Song:</h2>
         <div class="form-group">
-          <label for="song-select">Select Song:</label>
-          <select class="form-control" id="song-select" name="song" required>
+          <label for="song-delete">Select Song:</label>
+          <select class="form-control" id="song-delete" name="song" required>
             <option value="" selected disabled>Select a song</option>
           </select>
         </div>
@@ -84,7 +84,7 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         checkToken();
-        fetchAndRenderUserPlaylists();
+        fetchAndRenderUserPlaylists("playlist");
         const playlistSelect = document.getElementById("playlist");
         const songsContainer = document.getElementById("songs-container");
         const addSongForm = document.getElementById("add-song-form");
@@ -92,12 +92,12 @@
         const songOptionsSelect = document.getElementById("song-options");
         const addSongButton = document.getElementById("add-song-button");
         const deleteSongForm = document.getElementById("delete-song-form");
-        const songSelect = document.getElementById("song-select");
+        const songSelect = document.getElementById("song-delete");
 
         playlistSelect.addEventListener("change", async function () {
           const playlist = playlistSelect.value;
-          await fetchAndRenderSongsToContainer(playlist);
-          await fetchAndRenderSongsToBox(playlist);
+          await fetchAndRenderSongsToContainer(playlist, "song-list");
+          await fetchAndRenderSongsToBox(playlist, "song-delete");
         });
 
         addSongButton.addEventListener("click", async function () {
@@ -128,8 +128,8 @@
 
             if (response.status === 200) {
               console.log("Song Added");
-              await fetchAndRenderSongsToContainer(playlist);
-              history.replaceState(null, null, window.location.pathname);
+              await fetchAndRenderSongsToContainer(playlist, "song-list");
+              await fetchAndRenderSongsToBox(playlist, "song-delete");
             } else {
               alert("Failed to add song: " + data.message);
               console.log("Failed to add song:" + data.message);
@@ -197,7 +197,8 @@
 
             if (response.status === 200) {
               console.log("Song Deleted");
-              deleteSongForm.reset();
+              await fetchAndRenderSongsToContainer(playlist, "song-list");
+              await fetchAndRenderSongsToBox(playlist, "song-delete");
             } else {
               alert("Failed to delete song: "+ data.message);
               console.log("Failed to delete song: "+ data.message);

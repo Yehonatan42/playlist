@@ -6,8 +6,6 @@ const {authenticateToken} = require("../controllers/authentication.js");
 const {registration} = require("../controllers/registration.js");
 const {login} = require("../controllers/login.js");
 
-// router.get("/authenticate", authenticateToken);
-
 router.post("/register", registration);
 
 router.post("/login", login);

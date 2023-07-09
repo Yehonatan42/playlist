@@ -110,6 +110,7 @@ const deleteSongFromPlaylist = async (req, res) => {
 
     const song = playlist.songs.find((song) => song.title === songName);
     playlist.songs.pull({ _id: song._id });
+    playlist.duration -= song.duration;
     await playlist.save();
 
     console.log("Song deleted successfully");

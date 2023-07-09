@@ -1,6 +1,6 @@
-async function fetchAndRenderAllPlaylists() {
-  const select = document.getElementById("playlist");
+async function fetchAndRenderAllPlaylists(elementId) {
 
+  const select = document.getElementById(elementId);
   try {
     const response = await axios.get("/getAllPlaylists", {
       headers: {
@@ -23,18 +23,18 @@ async function fetchAndRenderAllPlaylists() {
     const option = document.createElement("option");
     option.value = playlist.name;
     const content = document.createTextNode(
-      `${playlist.name} - by ${playlist.owner.username}`
+      `${playlist.name} - ${formatTime(playlist.duration)}`
     );
     option.appendChild(content);
     select.appendChild(option);
   }
 }
 
-async function fetchAndRenderUserPlaylists() {
-  const select = document.getElementById("playlist");
+async function fetchAndRenderUserPlaylists(elementId) {
+  const select = document.getElementById(elementId);
 
   try {
-    const response = await axios.get("/getAllPlaylists", {
+    const response = await axios.get("/getUserPlaylists", {
       headers: {
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
@@ -62,7 +62,7 @@ async function fetchAndRenderUserPlaylists() {
   }
 }
 
-async function fetchAndRenderSongsToBox(playlistName) {
+async function fetchAndRenderSongsToBox(playlistName, elementId) {
   try {
     const response = await axios.get(`/getPlaylist`, {
       params: { playlist: playlistName },
@@ -74,7 +74,7 @@ async function fetchAndRenderSongsToBox(playlistName) {
 
     if (response.status === 200) {
       const playlist = response.data;
-      const songsDropdown = document.getElementById("song-select");
+      const songsDropdown = document.getElementById(elementId);
       songsDropdown.innerHTML = "";
 
       playlist.songs.forEach((song) => {
@@ -93,7 +93,7 @@ async function fetchAndRenderSongsToBox(playlistName) {
   }
 }
 
-async function fetchAndRenderSongsToContainer(playlistName) {
+async function fetchAndRenderSongsToContainer(playlistName, elementId) {
   try {
     const response = await axios.get(`/getPlaylist`, {
       params: { playlist: playlistName },
@@ -105,7 +105,7 @@ async function fetchAndRenderSongsToContainer(playlistName) {
 
     if (response.status === 200) {
       const data = response.data;
-      const songList = document.getElementById("song-list");
+      const songList = document.getElementById(elementId);
       songList.innerHTML = "";
 
       data.songs.forEach((song) => {
