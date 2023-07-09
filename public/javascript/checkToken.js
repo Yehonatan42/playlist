@@ -10,7 +10,7 @@ function checkToken() {
       alert("Your session has expired. Please log in again.");
     }
   } else {
-    return;
+    redirectToLogin();;
   }
 }
 
@@ -32,5 +32,3 @@ function decodeToken(token) {
 
   return JSON.parse(jsonPayload);
 }
-
-module.exports = { checkToken };

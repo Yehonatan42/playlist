@@ -8,7 +8,7 @@ const authenticateToken = async (req, res, next) => {
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       console.log("No token found");
-      return res.status(401).send("Access denied");
+      return res.redirect("/login");
     }
 
     const token = authHeader.split(" ")[1];
@@ -17,14 +17,15 @@ const authenticateToken = async (req, res, next) => {
 
     if (!userId) {
       console.log("User ID extraction from token failed");
-      return res.status(401).send("Access denied");
+      
+      return res.redirect("/login");
     }
 
     req.headers.userId = userId;
     next();
   } catch (error) {
     console.log(error);
-    res.status(500).send("Error authenticating token");
+    return res.redirect("/login");
   }
 };
 

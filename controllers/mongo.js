@@ -193,7 +193,7 @@ const getAllPlaylists = async (req, res) => {
   try {
     const playlists = await Playlist.find({}).populate("owner");
     console.log("Fetched playlists successfully");
-    console.log(playlists);
+
     res.status(200).json(playlists);
   } catch (error) {
     console.error("Error fetching playlists:", error);

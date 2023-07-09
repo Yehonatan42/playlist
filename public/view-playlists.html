@@ -2,6 +2,8 @@
 <html>
   <head>
     <title>View Playlists</title>
+    <button onclick="logout()">Log Out</button>
+    <button onclick="main()">Main</button>
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
@@ -32,10 +34,11 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="./javascript/checkToken.js"></script>
     <script src="./javascript/playlistUtils.js"></script>
+    <script src="./javascript/redirection.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         checkToken();
-        fetchAndRenderPlaylists("all");
+        fetchAndRenderAllPlaylists("all");
         const playlistSelect = document.getElementById("playlist");
         const songsContainer = document.getElementById("songs-container");
         const songList = document.getElementById("song-list");

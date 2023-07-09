@@ -10,7 +10,7 @@ const {login} = require("../controllers/login.js");
 
 router.post("/register", registration);
 
-router.post("/login", login)
+router.post("/login", login);
 
 router.post("/createPlaylist", authenticateToken, createPlaylist);
 

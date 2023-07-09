@@ -1,21 +1,12 @@
-async function fetchAndRenderPlaylists(UserOrAllPLaylists) {
+async function fetchAndRenderAllPlaylists() {
   const select = document.getElementById("playlist");
 
   try {
-    let response;
-    if (UserOrAllPLaylists === "user") {
-      response = await axios.get("/getUserPlaylists", {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-      });
-    } else {
-      response = await axios.get("/getAllPlaylists", {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-      });
-    }
+    const response = await axios.get("/getAllPlaylists", {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
 
     const data = response.data;
 
@@ -31,7 +22,41 @@ async function fetchAndRenderPlaylists(UserOrAllPLaylists) {
   function render(playlist) {
     const option = document.createElement("option");
     option.value = playlist.name;
-    const content = document.createTextNode(`${playlist.name} - by ${playlist.owner.username}`);
+    const content = document.createTextNode(
+      `${playlist.name} - by ${playlist.owner.username}`
+    );
+    option.appendChild(content);
+    select.appendChild(option);
+  }
+}
+
+async function fetchAndRenderUserPlaylists() {
+  const select = document.getElementById("playlist");
+
+  try {
+    const response = await axios.get("/getAllPlaylists", {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+
+    const data = response.data;
+
+    if (response.status === 200) {
+      data.forEach((obj) => render(obj));
+    } else {
+      console.error("Failed to fetch playlists:", data.error);
+    }
+  } catch (error) {
+    console.error("Error fetching playlists:", error);
+  }
+
+  function render(playlist) {
+    const option = document.createElement("option");
+    option.value = playlist.name;
+    const content = document.createTextNode(
+      `${playlist.name}`
+    );
     option.appendChild(content);
     select.appendChild(option);
   }
@@ -85,7 +110,9 @@ async function fetchAndRenderSongsToContainer(playlistName) {
 
       data.songs.forEach((song) => {
         const listItem = document.createElement("li");
-        listItem.textContent = `${song.title} - ${song.artist} (${formatTime(song.duration)})`;
+        listItem.textContent = `${song.title} - ${song.artist} (${formatTime(
+          song.duration
+        )})`;
         songList.appendChild(listItem);
       });
       songsContainer.style.display = "block";
@@ -108,14 +135,10 @@ const formatTime = (milliseconds) => {
     timeString += hours.toString().padStart(2, "0") + ":";
   }
 
-  timeString += minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
+  timeString +=
+    minutes.toString().padStart(2, "0") +
+    ":" +
+    seconds.toString().padStart(2, "0");
 
   return timeString;
-};
-
-
-module.exports = {
-  fetchAndRenderPlaylists,
-  fetchAndRenderSongsToBox,
-  fetchAndRenderSongsToContainer,
 };
