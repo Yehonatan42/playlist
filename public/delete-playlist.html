@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Delete Playlist</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Delete Playlist</h1>
+      <form id="delete-playlist-form">
+        <div class="form-group">
+          <label for="playlist-select">Select Playlist:</label>
+          <select
+            class="form-control"
+            id="playlist"
+            name="playlist"
+            required
+          >
+            <option value="" selected disabled>Select a playlist</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-danger">Delete Playlist</button>
+      </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="./javascript/fetchPlaylists.js"></script>
+    <script src="./javascript/checkToken.js"></script>
+    <script>
+
+      document.addEventListener("DOMContentLoaded", function () {
+        checkToken();
+        fetchAndRenderPlaylists();
+        const playlistSelect = document.getElementById("playlist");
+
+        document
+          .getElementById("delete-playlist-form")
+          .addEventListener("submit", async function (event) {
+            const playlist = playlistSelect.value;
+
+            try {
+              const response = await axios.delete(
+                `/deletePlaylist`,
+                { params: { playlist: playlist },
+                  
+                  headers: {
+                    Authorization: "Bearer " + localStorage.getItem("token"),
+                  },
+                }
+              );
+
+              if (response.status === 200) {
+                alert("Playlist Deleted");
+              } else {
+                alert("Failed to delete playlist. Please try again.");
+              }
+            } catch (error) {
+              alert(
+                "An error occurred while deleting the playlist. Please try again."
+              );
+            }
+          });
+      });
+    </script>
+  </body>
+</html>

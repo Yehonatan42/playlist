@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Playlist Actions</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    />
+    <style>
+      body {
+        background-color: #343a40;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="text-center mt-5">Choose an action for your playlists</h1>
+      <div class="row justify-content-center mt-5">
+        <a href="./create-playlist.html" class="btn btn-primary m-2"
+          >Create Playlist</a
+        >
+        <a href="./view-playlists.html" class="btn btn-primary m-2"
+          >View Playlists</a
+        >
+        <a href="./edit-playlist.html" class="btn btn-primary m-2"
+          >Edit Playlist</a
+        >
+        <a href="./delete-playlist.html" class="btn btn-primary m-2"
+          >Delete Playlist</a
+        >
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+    <script src="./javascript/checkToken.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        checkToken();
+      });
+    </script>
+  </body>
+</html>
