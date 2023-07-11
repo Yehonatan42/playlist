@@ -8,21 +8,23 @@ const app = express();
 app.use(express.static('public'));
 app.use(cors());
 app.use(express.json());
+app.use('/', router);
 
-async function startServer() {
-  try {
-    await connectToDB();
-    app.use('/', router);
+let server;
 
-  } catch (error) {
-    console.error('Failed to connect to the database', error);
-  }
-}
-
-startServer();
-
-app.listen(3000, () => {
-  console.log('Server is running on http://localhost:3000');
+connectToDB().then(() => {
+  server = app.listen(3000, () => {
+    console.log('Server is running on http://localhost:3000');
+  });
 });
 
-module.exports = app;
+const closeServer = () => {
+  if (server) {
+    server.close();
+  }
+};
+
+module.exports = {
+  app,
+  closeServer
+};

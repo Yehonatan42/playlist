@@ -2,14 +2,14 @@ const User = require("../models/user");
 const {generateAuthToken} = require("./authentication.js");
 
 const registration =  async (req, res) => {
-    try {
+  try {
       const { username, password } = req.body;
-
+      
       if (!username || !password) {
         return res.status(400).json({ message: 'Please provide a username and password' });
       }
 
-      const existingUser = await User.findOne({ username });
+      const existingUser = await User.findOne({ username:  username});
       if (existingUser) {
         return res.status(409).json({ message: 'Username is already taken' });
       }

@@ -13,7 +13,7 @@ const login = async (req, res) => {
         .json({ message: "Please provide a username and password" });
     }
 
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username: username});
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
