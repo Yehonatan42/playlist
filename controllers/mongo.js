@@ -4,6 +4,43 @@ const User = require("../models/user");
 const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
 
+const createPlaylist = async (req, res) => {
+  try {
+    const playlistName = req.body.name;
+    const description = req.body.description;
+    const userId = req.headers.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    
+    const existingPlaylist = await Playlist.findOne({
+      name: playlistName,
+      owner: user._id
+    });
+    if (existingPlaylist) {
+      return res.status(409).send("Playlist already exists");
+    }
+    
+    const playlist = new Playlist({
+      name: playlistName,
+      description: description,
+      owner: user._id,
+    });
+
+    user.playlists.push(playlist._id);
+    await user.save();
+    await playlist.save();
+
+    console.log("Playlist created successfully");
+    res.status(200).json(playlist);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Error creating playlist");
+  }
+};
+
 const deletePlaylist = async (req, res) => {
   try {
     const userId = req.headers.userId;
@@ -28,7 +65,7 @@ const deletePlaylist = async (req, res) => {
     await user.save();
 
     console.log("Playlist deleted successfully");
-    res.status(200).json(user);
+    res.status(200).json(searchedPlaylist);
   } catch (error) {
     console.log(error);
     res.status(500).send("Error deleting playlist");
@@ -143,35 +180,6 @@ const getPlaylist = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).send("Error getting playlist");
-  }
-};
-
-const createPlaylist = async (req, res) => {
-  try {
-    const playlistName = req.body.name;
-    const description = req.body.description;
-    const userId = req.headers.userId;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    const playlist = new Playlist({
-      name: playlistName,
-      description: description,
-      owner: user._id,
-    });
-
-    user.playlists.push(playlist._id);
-    await user.save();
-    await playlist.save();
-
-    console.log("Playlist created successfully");
-    res.status(200).json(playlist);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send("Error creating playlist");
   }
 };
 

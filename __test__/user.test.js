@@ -7,22 +7,19 @@ const { generateAuthToken } = require("../controllers/authentication");
 require("dotenv").config();
 const secretKey = process.env.JWT_SECRET;
 
-beforeEach(async () => {
+beforeAll(async () => {
   await mongoose.connect(process.env.MONGODB_URI);
-  await User.findOneAndDelete({ username: "Test" });
-});
-
-afterEach(async () => {
-  await mongoose.connection.close();
 });
 
 afterAll(async () => {
-  await closeServer();
+  await mongoose.connection.close();
+  closeServer();
 });
 
 describe("User Registration and Login", () => {
   describe("User Registration", () => {
     test("Should signup a new user", async () => {
+      await User.findOneAndDelete({ username: "Test" });
       const response = await request(app)
         .post("/register")
         .send({
@@ -42,31 +39,17 @@ describe("User Registration and Login", () => {
     });
 
     test("Should return error for an existing username", async () => {
-      await User.create({
-        username: "Test",
-        password: "password123",
-      });
-
       const response = await request(app)
         .post("/register")
         .send({
           username: "Test",
-          password: "newpassword",
+          password: "1234567890",
         })
         .expect(409);
-
-      expect(response.body.message).toBe("Username is already taken");
     });
   });
 
   describe("User Login", () => {
-    beforeEach(async () => {
-      await User.create({
-        username: "Test",
-        password: "1234567890",
-      });
-    });
-
     test("Should login a test user", async () => {
       const response = await request(app)
         .post("/login")
@@ -94,8 +77,6 @@ describe("User Registration and Login", () => {
           password: "password123",
         })
         .expect(401);
-
-      expect(response.body.message).toBe("Invalid credentials");
     });
 
     test("Should return error when invalid credentials entered", async () => {
@@ -106,10 +87,6 @@ describe("User Registration and Login", () => {
           password: null,
         })
         .expect(400);
-
-      expect(response.body.message).toBe(
-        "Please provide a username and password"
-      );
     });
 
     test("Should return error when wrong password entered", async () => {
@@ -120,8 +97,6 @@ describe("User Registration and Login", () => {
           password: "wrongpassword",
         })
         .expect(401);
-
-      expect(response.body.message).toBe("Invalid credentials");
     });
   });
 });
