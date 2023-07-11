@@ -12,17 +12,17 @@ const createPlaylist = async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).send("User not found");
+      return res.status(404).json({ message: "User not found" });
     }
-    
+
     const existingPlaylist = await Playlist.findOne({
       name: playlistName,
       owner: user._id
     });
     if (existingPlaylist) {
-      return res.status(409).send("Playlist already exists");
+      return res.status(409).json({ message: "Playlist already exists" });
     }
-    
+
     const playlist = new Playlist({
       name: playlistName,
       description: description,
@@ -36,8 +36,8 @@ const createPlaylist = async (req, res) => {
     console.log("Playlist created successfully");
     res.status(200).json(playlist);
   } catch (error) {
-    console.log(error);
-    res.status(500).send("Error creating playlist");
+    console.error(error);
+    res.status(500).json({ message: "Error creating playlist" });
   }
 };
 
@@ -48,13 +48,12 @@ const deletePlaylist = async (req, res) => {
 
     const user = await User.findById(userId).populate("playlists");
     if (!user) {
-      return res.status(404).send("User not found");
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const searchedPlaylist = await user.playlists
-      .find((playlist) => playlist.name === playlistName).populate("owner");
+    const searchedPlaylist = user.playlists.find((playlist) => playlist.name === playlistName);
     if (!searchedPlaylist) {
-      return res.status(404).send("Playlist not found");
+      return res.status(404).json({ message: "Playlist not found" });
     }
 
     await user.updateOne({ $pull: { playlists: searchedPlaylist._id } });
@@ -67,8 +66,8 @@ const deletePlaylist = async (req, res) => {
     console.log("Playlist deleted successfully");
     res.status(200).json(searchedPlaylist);
   } catch (error) {
-    console.log(error);
-    res.status(500).send("Error deleting playlist");
+    console.error(error);
+    res.status(500).json({ message: "Error deleting playlist" });
   }
 };
 
@@ -76,32 +75,30 @@ const addToPlaylist = async (req, res) => {
   try {
     const userId = req.headers.userId;
     const playlistName = req.body.playlist;
-    const songName = req.body.songName;
-    const artistName = req.body.artistName;
+    const title = req.body.title;
+    const artist = req.body.artist;
     const duration = req.body.duration;
 
     const user = await User.findById(userId).populate("playlists");
     if (!user) {
-      return res.status(404).send("User not found");
+      return res.status(404).json({ message: "User not found" });
     }
-
-    const searchedPlaylist = user.playlists.find(
-      (playlist) => playlist.name === playlistName
-    );
+    
+    const searchedPlaylist = user.playlists.find((playlist) => playlist.name === playlistName);
     if (!searchedPlaylist) {
-      return res.status(404).send("Playlist not found");
+      return res.status(404).json({ message: "Playlist not found" });
     }
     const playlist = await Playlist.findById(searchedPlaylist._id);
 
-    const existingSong = await Song.findOne({ title: songName });
+    const existingSong = await Song.findOne({ title: title });
     let newSong;
 
     if (existingSong) {
       newSong = existingSong;
     } else {
       newSong = await Song.create({
-        title: songName,
-        artist: artistName,
+        title: title,
+        artist: artist,
         duration: duration,
       });
     }
@@ -113,10 +110,10 @@ const addToPlaylist = async (req, res) => {
     }
 
     console.log("Song added successfully");
-    res.status(200).json(playlist);
+    res.status(200).json(newSong);
   } catch (error) {
-    console.log(error);
-    res.status(500).send("Error adding songs");
+    console.error(error);
+    res.status(500).json({ message: "Error adding songs" });
   }
 };
 
@@ -124,28 +121,24 @@ const deleteSongFromPlaylist = async (req, res) => {
   try {
     const userId = req.headers.userId;
     const playlistName = req.body.playlist;
-    const songName = req.body.song;
+    const title = req.body.title;
 
     const user = await User.findById(userId).populate("playlists");
     if (!user) {
-      return res.status(404).send("User not found");
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const searchedPlaylist = user.playlists.find(
-      (playlist) => playlist.name === playlistName
-    );
+    const searchedPlaylist = user.playlists.find((playlist) => playlist.name === playlistName);
     if (!searchedPlaylist) {
-      return res.status(404).send("Playlist not found");
+      return res.status(404).json({ message: "Playlist not found" });
     }
 
-    const playlist = await Playlist.findById(searchedPlaylist._id).populate(
-      "songs"
-    );
+    const playlist = await Playlist.findById(searchedPlaylist._id).populate("songs");
     if (!playlist) {
-      return res.status(404).send("Playlist not found");
+      return res.status(404).json({ message: "Playlist not found" });
     }
-
-    const song = playlist.songs.find((song) => song.title === songName);
+ 
+    const song = playlist.songs.find((song) => song.title === title);
     playlist.songs.pull({ _id: song._id });
     playlist.duration -= song.duration;
     await playlist.save();
@@ -153,8 +146,8 @@ const deleteSongFromPlaylist = async (req, res) => {
     console.log("Song deleted successfully");
     res.status(200).json(playlist);
   } catch (error) {
-    console.log(error);
-    res.status(500).send("Error deleting song from playlist");
+    console.error(error);
+    res.status(500).json({ message: "Error deleting song from playlist" });
   }
 };
 
@@ -165,21 +158,19 @@ const getPlaylist = async (req, res) => {
 
     const user = await User.findById(userId).populate("playlists");
     if (!user) {
-      return res.status(404).send("User not found");
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const playlist = await user.playlists
-      .find((playlist) => playlist.name === playlistName)
-      .populate("songs");
+    const playlist = user.playlists.find((playlist) => playlist.name === playlistName);
     if (!playlist) {
-      return res.status(404).send("Playlist not found");
+      return res.status(404).json({ message: "Playlist not found" });
     }
 
-    console.log("playlist fetched successfully");
+    console.log("Playlist fetched successfully");
     res.status(200).json(playlist);
   } catch (error) {
-    console.log(error);
-    res.status(500).send("Error getting playlist");
+    console.error(error);
+    res.status(500).json({ message: "Error getting playlist" });
   }
 };
 
@@ -188,13 +179,14 @@ const getUserPlaylists = async (req, res) => {
     const userId = req.headers.userId;
     const user = await User.findById(userId).populate("playlists");
     if (!user) {
-      return res.status(404).send("User not found");
+      return res.status(404).json({ message: "User not found" });
     }
     const playlists = user.playlists;
     console.log("Fetched playlists successfully");
     res.status(200).json(playlists);
   } catch (error) {
     console.error("Error fetching playlists:", error);
+    res.status(500).json({ message: "Error fetching playlists" });
   }
 };
 
@@ -206,6 +198,7 @@ const getAllPlaylists = async (req, res) => {
     res.status(200).json(playlists);
   } catch (error) {
     console.error("Error fetching playlists:", error);
+    res.status(500).json({ message: "Error fetching playlists" });
   }
 };
 
