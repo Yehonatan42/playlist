@@ -22,6 +22,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await User.findByIdAndDelete(userId);
   await mongoose.connection.close();
   closeServer();
 });
@@ -136,14 +137,16 @@ describe("Playlist Management", () => {
 
   describe("Delete Song from Playlist", () => {
     it("should delete a song from an existing playlist", async () => {
-      const song = Song.create({
+      const song = await Song.findOneAndUpdate({
         title: "Song Name",
         artist: "Artist Name",
         duration: 180,
       });
+
       const playlist = await Playlist.findOneAndUpdate(
         { name: "Test Playlist" },
-        { $push: { songs: song._id } }
+        { $push: { songs: song._id } },
+        { new: true }
       );
 
       const response = await request(app)
@@ -151,7 +154,7 @@ describe("Playlist Management", () => {
         .set("Authorization", "Bearer " + token)
         .send({
           playlist: "Test Playlist",
-          song: "Song Name",
+          title: "Song Name",
         })
         .expect(200);
 
@@ -163,8 +166,8 @@ describe("Playlist Management", () => {
         .put("/deleteSongFromPlaylist")
         .set("Authorization", "Bearer " + token)
         .send({
-          playlist: "Test Playlist",
-          song: "Song Name",
+          playlist: "Test Non Existant Playlist",
+          title: "Song Name",
         })
         .expect(404);
     });
@@ -172,24 +175,22 @@ describe("Playlist Management", () => {
 
   describe("Get Playlist", () => {
     it("should get an existing playlist", async () => {
-      const playlist = await Playlist.create({
-        name: "Test Playlist",
-        description: "My awesome playlist",
-        owner: userId,
-        songs: [
-          {
-            title: "Song 1",
-            artist: "Artist 1",
-            duration: 180,
-          },
-          {
-            title: "Song 2",
-            artist: "Artist 2",
-            duration: 240,
-          },
-        ],
+      const song1 = await Song.findOneAndUpdate({
+        title: "Song Name",
+        artist: "Artist Name",
+        duration: 180,
       });
-
+      const song2 = await Song.findOneAndUpdate({
+        title: "Song Name2",
+        artist: "Artist Name2",
+        duration: 180,
+      });
+      const playlist = await Playlist.findOne(
+        { name: "Test Playlist" },
+      );
+      playlist.songs.push(song1._id);
+      playlist.songs.push(song2._id);
+      await playlist.save();
       const response = await request(app)
         .get("/getPlaylist")
         .set("Authorization", "Bearer " + token)
@@ -200,6 +201,7 @@ describe("Playlist Management", () => {
       expect(response.body.description).toBe("My awesome playlist");
       expect(response.body.owner).toBe(userId);
       expect(response.body.songs.length).toBe(2);
+      expect(response.body.songs[0].name).toBe("Song Name");
     });
 
     it("should return an error if the playlist is not found", async () => {

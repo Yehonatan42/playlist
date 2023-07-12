@@ -1,5 +1,5 @@
 const express = require('express');
-const { connectToDB } = require('./controllers/connectToDB.js');
+const { connectToDB, disconnectDB } = require('./controllers/connectToDB.js');
 const { router } = require('./routes/router.js');
 const cors = require('cors');
 require('dotenv').config();
@@ -18,8 +18,9 @@ connectToDB().then(() => {
   });
 });
 
-const closeServer = () => {
+const closeServer = async () => {
   if (server) {
+    await disconnectDB();
     server.close();
   }
 };

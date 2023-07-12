@@ -17,7 +17,7 @@ const createPlaylist = async (req, res) => {
 
     const existingPlaylist = await Playlist.findOne({
       name: playlistName,
-      owner: user._id
+      owner: user._id,
     });
     if (existingPlaylist) {
       return res.status(409).json({ message: "Playlist already exists" });
@@ -46,12 +46,15 @@ const deletePlaylist = async (req, res) => {
     const userId = req.headers.userId;
     const playlistName = req.query.playlist;
 
-    const user = await User.findById(userId).populate("playlists");
-    if (!user) {
+    const searchedUser = await User.findById(userId);
+    if (!searchedUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const searchedPlaylist = user.playlists.find((playlist) => playlist.name === playlistName);
+    const user = await searchedUser.populate("playlists");
+    const searchedPlaylist = user.playlists.find(
+      (playlist) => playlist.name === playlistName
+    );
     if (!searchedPlaylist) {
       return res.status(404).json({ message: "Playlist not found" });
     }
@@ -78,13 +81,15 @@ const addToPlaylist = async (req, res) => {
     const title = req.body.title;
     const artist = req.body.artist;
     const duration = req.body.duration;
-
-    const user = await User.findById(userId).populate("playlists");
-    if (!user) {
+    
+    const searchedUser = await User.findById(userId);
+    if (!searchedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-    
-    const searchedPlaylist = user.playlists.find((playlist) => playlist.name === playlistName);
+    const user = await searchedUser.populate("playlists");
+    const searchedPlaylist = user.playlists.find(
+      (playlist) => playlist.name === playlistName
+    );
     if (!searchedPlaylist) {
       return res.status(404).json({ message: "Playlist not found" });
     }
@@ -108,7 +113,7 @@ const addToPlaylist = async (req, res) => {
       playlist.songs.push(newSong._id);
       await playlist.save();
     }
-
+    
     console.log("Song added successfully");
     res.status(200).json(newSong);
   } catch (error) {
@@ -122,23 +127,26 @@ const deleteSongFromPlaylist = async (req, res) => {
     const userId = req.headers.userId;
     const playlistName = req.body.playlist;
     const title = req.body.title;
-
-    const user = await User.findById(userId).populate("playlists");
-    if (!user) {
+    
+    const searchedUser = await User.findById(userId);
+    if (!searchedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    const searchedPlaylist = user.playlists.find((playlist) => playlist.name === playlistName);
+    const user = await searchedUser.populate("playlists");
+    const searchedPlaylist = user.playlists.find(
+      (playlist) => playlist.name === playlistName
+    );
     if (!searchedPlaylist) {
       return res.status(404).json({ message: "Playlist not found" });
     }
 
-    const playlist = await Playlist.findById(searchedPlaylist._id).populate("songs");
-    if (!playlist) {
-      return res.status(404).json({ message: "Playlist not found" });
-    }
- 
+    const playlist = await searchedPlaylist.populate("songs");
     const song = playlist.songs.find((song) => song.title === title);
+
+    if (!song) {
+      return res.status(404).json({ message: "Song not found" });
+    }
+
     playlist.songs.pull({ _id: song._id });
     playlist.duration -= song.duration;
     await playlist.save();
@@ -156,15 +164,18 @@ const getPlaylist = async (req, res) => {
     const userId = req.headers.userId;
     const playlistName = req.query.playlist;
 
-    const user = await User.findById(userId).populate("playlists");
-    if (!user) {
+    const searchedUser = await User.findById(userId);
+    if (!searchedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    const playlist = user.playlists.find((playlist) => playlist.name === playlistName);
-    if (!playlist) {
+    const user = await searchedUser.populate("playlists");
+    const searchedPlaylist = user.playlists.find(
+      (playlist) => playlist.name === playlistName
+    );
+    if (!searchedPlaylist) {
       return res.status(404).json({ message: "Playlist not found" });
     }
+    const playlist = await searchedPlaylist.populate("songs");
 
     console.log("Playlist fetched successfully");
     res.status(200).json(playlist);
@@ -177,10 +188,11 @@ const getPlaylist = async (req, res) => {
 const getUserPlaylists = async (req, res) => {
   try {
     const userId = req.headers.userId;
-    const user = await User.findById(userId).populate("playlists");
-    if (!user) {
+    const searchedUser = await User.findById(userId);
+    if (!searchedUser) {
       return res.status(404).json({ message: "User not found" });
     }
+    const user = await searchedUser.populate("playlists");
     const playlists = user.playlists;
     console.log("Fetched playlists successfully");
     res.status(200).json(playlists);
@@ -192,15 +204,27 @@ const getUserPlaylists = async (req, res) => {
 
 const getAllPlaylists = async (req, res) => {
   try {
-    const playlists = await Playlist.find({}).populate("owner");
-    console.log("Fetched playlists successfully");
+    const searchedPlaylists = await Playlist.find({});
 
-    res.status(200).json(playlists);
+    if (!searchedPlaylists) {
+      return res.status(404).json({ message: "Playlist not found" });
+    }
+
+    const populatedPlaylists = [];
+
+    for (const playlist of searchedPlaylists) {
+      const populatedPlaylist = await playlist.populate("owner");
+      populatedPlaylists.push(populatedPlaylist);
+    }
+
+    console.log("Fetched playlists successfully");
+    res.status(200).json(populatedPlaylists);
   } catch (error) {
     console.error("Error fetching playlists:", error);
     res.status(500).json({ message: "Error fetching playlists" });
   }
 };
+
 
 module.exports = {
   createPlaylist,
@@ -209,5 +233,5 @@ module.exports = {
   addToPlaylist,
   deleteSongFromPlaylist,
   getAllPlaylists,
-  getUserPlaylists
+  getUserPlaylists,
 };

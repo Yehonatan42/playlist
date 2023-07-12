@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "jest --detectOpenHandles"
+    "test": "NODE_ENV=test jest"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +17,7 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
+    "mongodb-memory-server": "^8.13.0",
     "mongoose": "^7.3.1",
     "supertest": "^6.3.3"
   },

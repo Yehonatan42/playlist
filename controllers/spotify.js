@@ -21,7 +21,7 @@ const options = {
 const searchForSongOptions = async (req, res) => {
   try {
     const request = options;
-    request.params.q = req.query.songName;
+    request.params.q = req.query.title;
     
     const response = await axios.request(request);
     const data = response.data;

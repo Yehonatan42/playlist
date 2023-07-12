@@ -1,5 +1,4 @@
 async function fetchAndRenderAllPlaylists(elementId) {
-
   const select = document.getElementById(elementId);
   try {
     const response = await axios.get("/getAllPlaylists", {
