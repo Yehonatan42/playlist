@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const { connectToDB, disconnectDB } = require('../controllers/connectToDB.js');
 const jwt = require("jsonwebtoken");
 const { app, closeServer } = require("../server");
 const request = require("supertest");
@@ -12,7 +12,7 @@ let userId;
 let playlist;
 
 beforeAll(async () => {
-  await mongoose.connect(process.env.MONGODB_URI);
+  await connectToDB();
   const response = await request(app).post("/login").send({
     username: "Test",
     password: "1234567890",
@@ -23,7 +23,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await User.findByIdAndDelete(userId);
-  await mongoose.connection.close();
+  await disconnectDB();
   closeServer();
 });
 
