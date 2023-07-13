@@ -1,6 +1,6 @@
 # Playlist Creator
 
-This is a playlist creator project built with JavaScript, Express.js, HTML, and CSS. It allows users to create, view, edit, and delete playlists.
+This is a playlist creator project built with JavaScript, Express.js, HTML, and CSS. It allows users to create, view, edit, and delete playlists while also being able to view other user's playlists.
 
 ## Features
 
@@ -28,7 +28,7 @@ This is a playlist creator project built with JavaScript, Express.js, HTML, and 
 3. Use the provided interface to perform various actions on playlists:
 
 - **Create Playlist**: Click on the "Create Playlist" button to create a new playlist. Enter a name and add songs to the playlist.
-- **View Playlists**: Click on the "View Playlists" button to see a list of existing playlists and their songs.
+- **View Playlists**: Click on the "View Playlists" button to see a list of all existing playlists (other users too) and their songs.
 - **Edit Playlist**: Click on the "Edit Playlist" button next to a playlist to modify its details, such as the name and songs.
 - **Delete Playlist**: Click on the "Delete Playlist" button next to a playlist to remove it from the collection.
 
@@ -38,4 +38,6 @@ This is a playlist creator project built with JavaScript, Express.js, HTML, and 
 - Express.js
 - HTML
 - CSS
+- Jest
+- Mongoose
 
