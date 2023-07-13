@@ -176,7 +176,7 @@ const getPlaylist = async (req, res) => {
       return res.status(404).json({ message: "Playlist not found" });
     }
     const playlist = await searchedPlaylist.populate("songs");
-
+    
     console.log("Playlist fetched successfully");
     res.status(200).json(playlist);
   } catch (error) {
@@ -194,6 +194,7 @@ const getUserPlaylists = async (req, res) => {
     }
     const user = await searchedUser.populate("playlists");
     const playlists = user.playlists;
+    
     console.log("Fetched playlists successfully");
     res.status(200).json(playlists);
   } catch (error) {

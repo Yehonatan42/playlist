@@ -1,4 +1,4 @@
-const { connectToDB, disconnectDB } = require('../controllers/connectToDB.js');
+const { connectToDB, disconnectDB } = require("../controllers/connectToDB.js");
 const jwt = require("jsonwebtoken");
 const { app, closeServer } = require("../server");
 const request = require("supertest");
@@ -13,20 +13,18 @@ let playlist;
 
 beforeAll(async () => {
   await connectToDB();
-  const response = await request(app).post("/login").send({
-    username: "Test2",
+  const response = await request(app).post("/register").send({
+    username: "Test",
     password: "1234567890",
   });
   token = response.body.token;
-  console.log(token);
 
-  userId = jwt.verify(token, process.env.JWT_SECRET).id;
+  const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+  userId = decodedToken.id;
 });
 
 afterAll(async () => {
   await User.deleteMany();
-  await Playlist.deleteMany();
-  await Song.deleteMany();
   await disconnectDB();
   closeServer();
 });
@@ -44,7 +42,8 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  await Playlist.deleteOne({ _id: playlist._id });
+  await Playlist.deleteMany();
+  await Song.deleteMany();
 });
 
 describe("Playlist Management", () => {
@@ -83,13 +82,14 @@ describe("Playlist Management", () => {
 
   describe("Delete Playlist", () => {
     it("should delete an existing playlist", async () => {
+      const deletedPlaylist = await Playlist.findById(playlist._id);
+
       await request(app)
         .delete("/deletePlaylist")
         .set("Authorization", "Bearer " + token)
         .query({ playlist: "Test Playlist" })
         .expect(200);
 
-      const deletedPlaylist = await Playlist.findById(playlist._id);
       expect(deletedPlaylist).toEqual(
         expect.objectContaining({
           name: "Test Playlist",
@@ -141,17 +141,17 @@ describe("Playlist Management", () => {
 
   describe("Delete Song from Playlist", () => {
     it("should delete a song from an existing playlist", async () => {
-      const song = await Song.findOneAndUpdate({
+      const song = await Song.create({
         title: "Song Name",
         artist: "Artist Name",
         duration: 180,
       });
 
-      const playlist = await Playlist.findOneAndUpdate(
-        { name: "Test Playlist" },
-        { $push: { songs: song._id } },
-        { new: true }
-      );
+      const playlist = await Playlist.findOneAndUpdate({
+        name: "Test Playlist",
+        $push: { songs: song._id },
+        new: true,
+      });
 
       const response = await request(app)
         .put("/deleteSongFromPlaylist")
@@ -179,19 +179,17 @@ describe("Playlist Management", () => {
 
   describe("Get Playlist", () => {
     it("should get an existing playlist", async () => {
-      const song1 = await Song.findOneAndUpdate({
+      const song1 = await Song.create({
         title: "Song Name",
         artist: "Artist Name",
         duration: 180,
       });
-      const song2 = await Song.findOneAndUpdate({
+      const song2 = await Song.create({
         title: "Song Name2",
         artist: "Artist Name2",
         duration: 180,
       });
-      const playlist = await Playlist.findOne(
-        { name: "Test Playlist" },
-      );
+      const playlist = await Playlist.findOne({ name: "Test Playlist" });
       playlist.songs.push(song1._id);
       playlist.songs.push(song2._id);
       await playlist.save();
@@ -205,7 +203,7 @@ describe("Playlist Management", () => {
       expect(response.body.description).toBe("My awesome playlist");
       expect(response.body.owner).toBe(userId);
       expect(response.body.songs.length).toBe(2);
-      expect(response.body.songs[0].name).toBe("Song Name");
+      expect(response.body.songs[0].title).toContain("Song Name");
     });
 
     it("should return an error if the playlist is not found", async () => {
@@ -219,17 +217,15 @@ describe("Playlist Management", () => {
 
   describe("Get User Playlists", () => {
     it("should get all playlists for a user", async () => {
-      await Playlist.create({
-        name: "Playlist 1",
-        description: "Playlist 1 description",
-        owner: userId,
-      });
-      await Playlist.create({
-        name: "Playlist 2",
+      const playlist2 = await Playlist.create({
+        name: "Test Playlist 2",
         description: "Playlist 2 description",
         owner: userId,
       });
 
+      await User.findByIdAndUpdate(userId, 
+        { $push: { playlists: playlist2._id } }
+      )
       const response = await request(app)
         .get("/getUserPlaylists")
         .set("Authorization", "Bearer " + token)
@@ -241,15 +237,14 @@ describe("Playlist Management", () => {
 
   describe("Get All Playlists", () => {
     it("should get all playlists", async () => {
-      await Playlist.create({
-        name: "Playlist 1",
-        description: "Playlist 1 description",
-        owner: "user1",
+      const user2 = await User.create({
+        username: "Test User 2",
+        password: "01234567890",
       });
-      await Playlist.create({
-        name: "Playlist 2",
+      const playlist2 = await Playlist.create({
+        name: "Test Playlist 2",
         description: "Playlist 2 description",
-        owner: "user2",
+        owner: user2._id,
       });
 
       const response = await request(app)

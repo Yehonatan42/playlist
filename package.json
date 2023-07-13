@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "NODE_ENV=TEST jest --runInBand"
+    "test": "export NODE_ENV=TEST && jest --runInBand"
   },
   "author": "",
   "license": "ISC",

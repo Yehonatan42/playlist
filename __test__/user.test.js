@@ -23,18 +23,18 @@ describe("User Registration and Login", () => {
       const response = await request(app)
         .post("/register")
         .send({
-          username: "Test1",
+          username: "Test",
           password: "1234567890",
         })
         .expect(200);
-
+      
       const receivedToken = response.body.token;
       const decodedToken = jwt.verify(receivedToken, process.env.JWT_SECRET);
       const userId = decodedToken.id;
       const user = await User.findById(userId);
 
       expect(receivedToken).toBe(generateAuthToken(user));
-      expect(user.username).toBe("Test1");
+      expect(user.username).toBe("Test");
       expect(user.password).not.toBe("1234567890");
     });
 
@@ -42,7 +42,7 @@ describe("User Registration and Login", () => {
       const response = await request(app)
         .post("/register")
         .send({
-          username: "Test1",
+          username: "Test",
           password: "1234567890",
         })
         .expect(409);
@@ -54,18 +54,18 @@ describe("User Registration and Login", () => {
       const response = await request(app)
         .post("/login")
         .send({
-          username: "Test1",
+          username: "Test",
           password: "1234567890",
         })
         .expect(200);
-
+       
       const receivedToken = response.body.token;
       const decodedToken = jwt.verify(receivedToken, process.env.JWT_SECRET);
       const userId = decodedToken.id;
       const user = await User.findById(userId);
 
       expect(receivedToken).toBe(generateAuthToken(user));
-      expect(user.username).toBe("Test1");
+      expect(user.username).toBe("Test");
       expect(user.password).not.toBe("1234567890");
     });
 
@@ -93,7 +93,7 @@ describe("User Registration and Login", () => {
       const response = await request(app)
         .post("/login")
         .send({
-          username: "Test1",
+          username: "Test",
           password: "wrongpassword",
         })
         .expect(401);

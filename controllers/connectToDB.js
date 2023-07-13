@@ -1,10 +1,10 @@
 require("dotenv").config();
-const mongoUrl = process.env.MONGODB_URI;
+let mongoUrl = process.env.MONGODB_URI;
 const mongoose = require('mongoose');
 
 const connectToDB = async () => {
   try {
-    if (process.env.NODE_ENV === 'test') {
+    if (process.env.NODE_ENV === 'TEST') {
       mongoUrl = process.env.__MONGODB_URI__;
     }
 
