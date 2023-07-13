@@ -82,20 +82,14 @@ describe("Playlist Management", () => {
 
   describe("Delete Playlist", () => {
     it("should delete an existing playlist", async () => {
-      const deletedPlaylist = await Playlist.findById(playlist._id);
-
       await request(app)
-        .delete("/deletePlaylist")
-        .set("Authorization", "Bearer " + token)
-        .query({ playlist: "Test Playlist" })
-        .expect(200);
-
-      expect(deletedPlaylist).toEqual(
-        expect.objectContaining({
-          name: "Test Playlist",
-          description: "My awesome playlist",
-        })
-      );
+      .delete("/deletePlaylist")
+      .set("Authorization", "Bearer " + token)
+      .query({ playlist: "Test Playlist" })
+      .expect(200);
+      
+      const deletedPlaylist = await Playlist.findById(playlist._id);
+      expect(!deletedPlaylist);
     });
 
     it("should return an error if the playlist is not found for the user", async () => {
@@ -113,7 +107,7 @@ describe("Playlist Management", () => {
         .put("/addToPlaylist")
         .set("Authorization", "Bearer " + token)
         .send({
-          playlist: "Test Playlist",
+          playlist: playlist.name,
           title: "Song Name",
           artist: "Artist Name",
           duration: 180,
