@@ -1,18 +1,18 @@
-const mongoose = require("mongoose");
+const { connectToDB, disconnectDB } = require('../controllers/connectToDB.js');
 const jwt = require("jsonwebtoken");
-const {app, closeServer} = require("../server");
-const User = require("../models/user");
+const { app, closeServer } = require("../server");
 const request = require("supertest");
-const { generateAuthToken } = require("../controllers/authentication");
+const User = require("../models/user");
+const {generateAuthToken} = require("../controllers/authentication");
 require("dotenv").config();
-const secretKey = process.env.JWT_SECRET;
 
 beforeAll(async () => {
-  await mongoose.connect(process.env.MONGODB_URI);
+  await connectToDB();
 });
 
 afterAll(async () => {
-  await mongoose.connection.close();
+  await User.deleteMany();
+  await disconnectDB();
   closeServer();
 });
 
@@ -23,18 +23,18 @@ describe("User Registration and Login", () => {
       const response = await request(app)
         .post("/register")
         .send({
-          username: "Test",
+          username: "Test1",
           password: "1234567890",
         })
         .expect(200);
 
       const receivedToken = response.body.token;
-      const decodedToken = jwt.verify(receivedToken, secretKey);
+      const decodedToken = jwt.verify(receivedToken, process.env.JWT_SECRET);
       const userId = decodedToken.id;
       const user = await User.findById(userId);
 
       expect(receivedToken).toBe(generateAuthToken(user));
-      expect(user.username).toBe("Test");
+      expect(user.username).toBe("Test1");
       expect(user.password).not.toBe("1234567890");
     });
 
@@ -42,7 +42,7 @@ describe("User Registration and Login", () => {
       const response = await request(app)
         .post("/register")
         .send({
-          username: "Test",
+          username: "Test1",
           password: "1234567890",
         })
         .expect(409);
@@ -54,18 +54,18 @@ describe("User Registration and Login", () => {
       const response = await request(app)
         .post("/login")
         .send({
-          username: "Test",
+          username: "Test1",
           password: "1234567890",
         })
         .expect(200);
 
       const receivedToken = response.body.token;
-      const decodedToken = jwt.verify(receivedToken, secretKey);
+      const decodedToken = jwt.verify(receivedToken, process.env.JWT_SECRET);
       const userId = decodedToken.id;
       const user = await User.findById(userId);
 
       expect(receivedToken).toBe(generateAuthToken(user));
-      expect(user.username).toBe("Test");
+      expect(user.username).toBe("Test1");
       expect(user.password).not.toBe("1234567890");
     });
 
@@ -93,7 +93,7 @@ describe("User Registration and Login", () => {
       const response = await request(app)
         .post("/login")
         .send({
-          username: "Test",
+          username: "Test1",
           password: "wrongpassword",
         })
         .expect(401);

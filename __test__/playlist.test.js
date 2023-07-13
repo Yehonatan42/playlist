@@ -14,15 +14,19 @@ let playlist;
 beforeAll(async () => {
   await connectToDB();
   const response = await request(app).post("/login").send({
-    username: "Test",
+    username: "Test2",
     password: "1234567890",
   });
   token = response.body.token;
+  console.log(token);
+
   userId = jwt.verify(token, process.env.JWT_SECRET).id;
 });
 
 afterAll(async () => {
-  await User.findByIdAndDelete(userId);
+  await User.deleteMany();
+  await Playlist.deleteMany();
+  await Song.deleteMany();
   await disconnectDB();
   closeServer();
 });
