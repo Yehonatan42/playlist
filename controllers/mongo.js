@@ -6,8 +6,7 @@ mongoose.set("strictQuery", false);
 
 const createPlaylist = async (req, res) => {
   try {
-    const playlistName = req.body.name;
-    const description = req.body.description;
+    const { name: playlistName, description } = req.body;
     const userId = req.headers.userId;
 
     const user = await User.findById(userId);
@@ -77,10 +76,7 @@ const deletePlaylist = async (req, res) => {
 const addToPlaylist = async (req, res) => {
   try {
     const userId = req.headers.userId;
-    const playlistName = req.body.playlist;
-    const title = req.body.title;
-    const artist = req.body.artist;
-    const duration = req.body.duration;
+    const { playlist: playlistName, title, artist, duration } = req.body;
     
     const searchedUser = await User.findById(userId);
     if (!searchedUser) {
@@ -125,8 +121,7 @@ const addToPlaylist = async (req, res) => {
 const deleteSongFromPlaylist = async (req, res) => {
   try {
     const userId = req.headers.userId;
-    const playlistName = req.body.playlist;
-    const title = req.body.title;
+    const { playlist: playlistName, title } = req.body;
     
     const searchedUser = await User.findById(userId);
     if (!searchedUser) {
@@ -189,6 +184,7 @@ const getUserPlaylists = async (req, res) => {
   try {
     const userId = req.headers.userId;
     const searchedUser = await User.findById(userId);
+    
     if (!searchedUser) {
       return res.status(404).json({ message: "User not found" });
     }
